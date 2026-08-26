@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>структура из Figma vs текущая</title>
+<style>
+  :root{
+    --Numbers-Padding-8: 32px;
+    --Numbers-Border-Radius-8: 32px;
+    --Numbers-Padding-6: 24px;
+    --Numbers-Border-Radius-6: 24px;
+  }
+  *{margin:0;box-sizing:border-box}
+  body{min-height:100vh;background:#203C92;color:#fff;
+       font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+       display:flex;gap:26px;justify-content:center;align-items:flex-start;
+       padding:36px 18px;flex-wrap:wrap}
+  .col{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .cap{text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.6);max-width:312px}
+  .cap b{font-weight:600;display:block;margin-bottom:2px}
+  .cap span{color:rgba(255,255,255,.72);font-size:12px}
+
+  /* ================= СТАРЫЙ ВАРИАНТ (background-blend-mode) ================= */
+  .old{
+    position:relative; width:312px; height:420px;
+    padding:var(--Numbers-Padding-8);
+    border-radius:var(--Numbers-Border-Radius-8);
+    display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start;
+    overflow:hidden;
+    background-color: rgba(138,157,214,0.10);
+    background-image: url("img/card-lg.png");
+    background-position:50% 50%; background-size:cover; background-repeat:no-repeat;
+    background-blend-mode: lighten;
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  }
+
+  /* ================= СТРУКТУРА ИЗ FIGMA ================= */
+  .card{ position:relative; width:312px; height:420px; flex-shrink:0 }
+  .card__inner{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start;
+    padding: var(--Numbers-Padding-8);
+    border-radius: var(--Numbers-Border-Radius-8);
+    overflow:clip;
+  }
+  .card__bg{ position:absolute; inset:0; pointer-events:none;
+             border-radius: var(--Numbers-Border-Radius-8) }
+  .card__tint{ position:absolute; inset:0;
+               background: rgba(138,157,214,0.10);
+               border-radius: var(--Numbers-Border-Radius-8) }
+  .card__img{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    max-width:none; object-fit:cover;
+    border-radius: var(--Numbers-Border-Radius-8);
+    mix-blend-mode: lighten;
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+  }
+  /* размер 6 */
+  .card--sm{ width:240px; height:320px }
+  .card--sm .card__inner{ padding:var(--Numbers-Padding-6);
+                          border-radius:var(--Numbers-Border-Radius-6) }
+  .card--sm .card__bg, .card--sm .card__tint, .card--sm .card__img{
+    border-radius: var(--Numbers-Border-Radius-6) }
+  .card--sm .card__img{ -webkit-backdrop-filter: blur(15px); backdrop-filter: blur(15px) }
+
+  /* содержимое поверх */
+  .num{ position:relative; font-size:56px; line-height:56px; font-weight:500;
+        letter-spacing:-1.44px }
+  .card--sm .num{ font-size:48px; line-height:48px }
+  .top{ position:relative; display:flex; width:100%; align-items:flex-start;
+        justify-content:space-between }
+  .ico{ width:48px;height:48px;border-radius:999px;background:rgba(255,255,255,.2);
+        display:grid;place-items:center;font-size:20px }
+  .card--sm .ico{ width:40px;height:40px;font-size:17px }
+  .ttl{ position:relative; font-size:24px; line-height:32px; font-weight:500;
+        letter-spacing:-.64px }
+  .card--sm .ttl{ font-size:18px; line-height:24px }
+</style></head>
+<body>
+  <div class="col">
+    <div class="old">
+      <div class="top"><div class="num">01</div><div class="ico">›</div></div>
+      <div class="ttl">Title</div>
+    </div>
+    <div class="cap"><b>Было</b><span>background-blend-mode: lighten<br>фон не просвечивает</span></div>
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <div class="card__inner">
+        <div class="card__bg" aria-hidden="true">
+          <div class="card__tint"></div>
+          <img class="card__img" src="img/card-lg.png" alt="">
+        </div>
+        <div class="top"><div class="num">01</div><div class="ico">›</div></div>
+        <div class="ttl">Title</div>
+      </div>
+    </div>
+    <div class="cap"><b>Стало — структура из Figma</b><span>mix-blend-mode: lighten<br>+ backdrop-filter на слое картинки</span></div>
+  </div>
+
+  <div class="col">
+    <div class="card card--sm">
+      <div class="card__inner">
+        <div class="card__bg" aria-hidden="true">
+          <div class="card__tint"></div>
+          <img class="card__img" src="img/card-sm.png" alt="">
+        </div>
+        <div class="top"><div class="num">01</div><div class="ico">›</div></div>
+        <div class="ttl">Title</div>
+      </div>
+    </div>
+    <div class="cap"><b>Стало — размер 6</b><span>240 × 320, blur 15px</span></div>
+  </div>
+
+<script src="starfield.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  const base = q.get('base') || '#203C92';
+  const density = Number(q.get('density') || 0.7);
+  document.body.style.background = base;
+  Starfield.mount(document.body, { seed: 12, angle: 32, base: base, density: density });
+  window.__done = true;
+</script>
+</body></html>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>backdrop-filter на обоих типах карточек</title>
+<style>
+  :root{
+    --Numbers-Padding-8: 32px;
+    --Numbers-Gap-8: 32px;
+    --Numbers-Border-Radius-8: 32px;
+    --Primary-Bears-Boss-20: #FADC8E;
+    --Sky: #203C92;
+  }
+  *{ margin:0; box-sizing:border-box }
+  body{
+    min-height:100vh;
+    background: var(--Sky);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;
+    color:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:26px; padding:36px 24px;
+  }
+  h1{ font-size:20px; font-weight:600; text-align:center; text-shadow:0 2px 20px rgba(0,0,0,.45) }
+  .note{ font-size:13px; color:rgba(255,255,255,.8); text-align:center; max-width:700px;
+         text-shadow:0 1px 8px rgba(0,0,0,.5) }
+  .row{ display:flex; gap:28px; flex-wrap:wrap; justify-content:center; align-items:flex-start }
+  .col{ display:flex; flex-direction:column; align-items:center; gap:10px }
+  .cap{ font-size:13px; text-align:center; text-shadow:0 1px 8px rgba(0,0,0,.55) }
+  .cap b{ font-weight:600 }
+  .off{ color:#9FC6FF } .on{ color:#FADC8E }
+
+  /* слот: яркая подложка с резкими краями строго за карточкой */
+  .slot{ position:relative; display:grid; place-items:center; padding:22px }
+  .deco{
+    position:absolute; inset:0; z-index:0; border-radius:28px; overflow:hidden;
+    background:
+      radial-gradient(circle at 26% 22%, #FF5EA8 0 34px, transparent 35px),
+      radial-gradient(circle at 74% 26%, #4DE1FF 0 26px, transparent 27px),
+      radial-gradient(circle at 22% 76%, #FFD166 0 30px, transparent 31px),
+      radial-gradient(circle at 78% 80%, #7CFF9E 0 24px, transparent 25px),
+      repeating-linear-gradient(32deg,
+        rgba(255,255,255,.9) 0 3px, rgba(255,255,255,0) 3px 30px),
+      #0B1A47;
+  }
+  .slot > .card, .slot > .imgcard{ position:relative; z-index:1 }
+
+  /* ---------- стеклянная карточка ---------- */
+  .card{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    width:245px; height:340px;
+    padding: var(--Numbers-Padding-8);
+    gap: var(--Numbers-Gap-8);
+    border-radius: var(--Numbers-Border-Radius-8);
+    background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, var(--Primary-Bears-Boss-20) 100%);
+    box-shadow:
+      0 1px 2px 0 rgba(255,255,255,0.50) inset,
+      0 -32px 56px -24px #FFF inset;
+  }
+  .card--blur{ -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px) }
+  .card__title{ font-size:18px; font-weight:600; color:var(--Sky) }
+
+  /* ---------- карточка с изображением (структура из Figma) ---------- */
+  .imgcard{ position:relative; width:312px; height:420px; flex-shrink:0 }
+  .imgcard__inner{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    justify-content:space-between; align-items:flex-start;
+    padding: var(--Numbers-Padding-8);
+    border-radius: var(--Numbers-Border-Radius-8);
+    overflow: clip;
+  }
+  .imgcard__bg{ position:absolute; inset:0; pointer-events:none;
+                border-radius: var(--Numbers-Border-Radius-8) }
+  .imgcard__tint{ position:absolute; inset:0;
+                  border-radius: var(--Numbers-Border-Radius-8);
+                  background: rgba(138,157,214,0.10) }
+  .imgcard__img{
+    position:absolute; inset:0; width:100%; height:100%;
+    max-width:none; object-fit:cover;
+    border-radius: var(--Numbers-Border-Radius-8);
+    mix-blend-mode: lighten;
+  }
+  .imgcard--blur .imgcard__img{
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+  }
+  .imgcard__chip{ position:relative; padding:6px 12px; border-radius:999px;
+                  background:rgba(255,255,255,.18); font-size:12px; font-weight:600 }
+  .imgcard__title{ position:relative; font-size:18px; font-weight:600 }
+</style>
+</head>
+<body>
+  <h1>backdrop-filter: blur — обе карточки</h1>
+  <div class="note">
+    За каждой карточкой лежит одна и та же яркая подложка с резкими краями.
+    Обе карточки полупрозрачны, поэтому размытие видно в обеих.
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="slot">
+        <div class="deco"></div>
+        <div class="card"><div class="card__title">без blur</div></div>
+      </div>
+      <div class="cap"><b>стеклянная</b> · <span class="off">backdrop-filter: none</span></div>
+    </div>
+
+    <div class="col">
+      <div class="slot">
+        <div class="deco"></div>
+        <div class="card card--blur"><div class="card__title">blur 20px</div></div>
+      </div>
+      <div class="cap"><b>стеклянная</b> · <span class="on">backdrop-filter: blur(20px)</span></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="slot">
+        <div class="deco"></div>
+        <div class="imgcard">
+          <div class="imgcard__inner">
+            <div class="imgcard__bg" aria-hidden="true">
+              <div class="imgcard__tint"></div>
+              <img class="imgcard__img" src="img/card-lg.png" alt="">
+            </div>
+            <div class="imgcard__chip">Сегодня</div>
+            <div class="imgcard__title">без blur</div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>с изображением</b> · <span class="off">backdrop-filter: none</span></div>
+    </div>
+
+    <div class="col">
+      <div class="slot">
+        <div class="deco"></div>
+        <div class="imgcard imgcard--blur">
+          <div class="imgcard__inner">
+            <div class="imgcard__bg" aria-hidden="true">
+              <div class="imgcard__tint"></div>
+              <img class="imgcard__img" src="img/card-lg.png" alt="">
+            </div>
+            <div class="imgcard__chip">Сегодня</div>
+            <div class="imgcard__title">blur 20px</div>
+          </div>
+        </div>
+      </div>
+      <div class="cap"><b>с изображением</b> · <span class="on">backdrop-filter: blur(20px)</span></div>
+    </div>
+  </div>
+
+<script src="starfield.js"></script>
+<script>
+  Starfield.mount(document.body, { seed: 12, angle: 32, base: '#203C92', density: 0.7 });
+  window.__done = true;
+</script>
+</body>
+</html>
