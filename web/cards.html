@@ -26,32 +26,28 @@
 
   *{ margin:0; box-sizing:border-box }
 
+  html{ background: var(--sky) }
+
   body{
     min-height:100vh;
-    background: var(--sky) url("img/mishki-bg.png") center center / cover no-repeat fixed;
+    /* размер и привязка как в макете: 1920 × 1920 от левого верхнего угла.
+       repeat — на случай экрана шире 1920 (подложка бесшовная, проверено). */
+    background: var(--sky) url("img/mishki-bg.png") top left / 1920px 1920px repeat fixed;
     font-family: "X5 Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
     color: var(--neutral-white-100);
-    padding: 56px 24px 80px;
-    display:flex; flex-direction:column; align-items:center; gap:56px;
+    padding: 52px 24px;
   }
 
-  /* ================= обвязка страницы ================= */
-  .page__head{ text-align:center; max-width:640px; display:flex; flex-direction:column; gap:10px }
-  .page__title{ font-size:32px; line-height:40px; letter-spacing:-0.96px; font-weight:500;
-                text-shadow:0 2px 24px rgba(0,0,0,.45) }
-  .page__sub{ font-size:16px; line-height:24px; color:rgba(255,255,255,.72);
-              text-shadow:0 1px 10px rgba(0,0,0,.5) }
-
-  .section{ width:100%; max-width:640px; display:flex; flex-direction:column; gap:20px }
-  .section__head{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
-                  text-shadow:0 1px 10px rgba(0,0,0,.55) }
-  .section__title{ font-size:20px; line-height:28px; font-weight:500; letter-spacing:-0.4px }
-  .section__note{ font-size:14px; line-height:20px; color:rgba(255,255,255,.66) }
-
-  .specimens{ display:flex; flex-wrap:wrap; gap:28px; align-items:flex-start }
-  .specimen{ display:flex; flex-direction:column; gap:10px; align-items:flex-start }
-  .specimen__label{ font-size:13px; line-height:18px; color:rgba(255,255,255,.7);
-                    text-shadow:0 1px 8px rgba(0,0,0,.6) }
+  /* ряд карточек: зазор 24 везде, ряд 1176 по центру — как во фреймах.
+     Перенос сам даёт раскладку 768 и 360. */
+  .cards{
+    max-width: 1176px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
+  }
 
   /* =========================================================
      Карточка с фоновым изображением — типы Default и Апельсин
@@ -194,142 +190,87 @@
   }
   .bear--lg .bear__name{ font-size:24px; line-height:32px; letter-spacing:-0.64px }
   .bear--sm .bear__name{ font-size:18px; line-height:24px; letter-spacing:-0.48px }
-
-  @media (max-width: 720px){
-    body{ padding:40px 16px 64px; gap:44px }
-    .page__title{ font-size:26px; line-height:34px }
-    .specimens{ gap:22px }
-  }
 </style>
 </head>
 <body>
 
-  <header class="page__head">
-    <h1 class="page__title">Карточки</h1>
-    <p class="page__sub">
-      Три типа в двух размерах. Все карточки полупрозрачные — фон страницы
-      просвечивает сквозь них размытым.
-    </p>
-  </header>
+  <div class="cards">
 
-  <!-- ============ Default ============ -->
-  <section class="section">
-    <div class="section__head">
-      <h2 class="section__title">Default</h2>
-      <span class="section__note">номер и заголовок · подложка card-lg / card-sm</span>
-    </div>
-    <div class="specimens">
-
-      <div class="specimen">
-        <div class="card card--lg card--default">
-          <div class="card__inner">
-            <div class="card__bg" aria-hidden="true">
-              <div class="card__tint"></div>
-              <img class="card__img" src="img/card-lg.png" alt="">
-            </div>
-            <div class="card__top">
-              <span class="card__num">01</span>
-              <span class="card__icon"><img src="img/chevron-28.svg" alt="" width="28" height="28"></span>
-            </div>
-            <p class="card__text">Title</p>
-          </div>
+    <!-- Default, размер 8 -->
+    <div class="card card--lg card--default">
+      <div class="card__inner">
+        <div class="card__bg" aria-hidden="true">
+          <div class="card__tint"></div>
+          <img class="card__img" src="img/card-lg.png" alt="">
         </div>
-        <span class="specimen__label">312 × 420 · отступы 32 · blur 20</span>
-      </div>
-
-      <div class="specimen">
-        <div class="card card--sm card--default">
-          <div class="card__inner">
-            <div class="card__bg" aria-hidden="true">
-              <div class="card__tint"></div>
-              <img class="card__img" src="img/card-sm.png" alt="">
-            </div>
-            <div class="card__top">
-              <span class="card__num">01</span>
-              <span class="card__icon"><img src="img/chevron-24.svg" alt="" width="24" height="24"></span>
-            </div>
-            <p class="card__text">Title</p>
-          </div>
+        <div class="card__top">
+          <span class="card__num">01</span>
+          <span class="card__icon"><img src="img/chevron-28.svg" alt="" width="28" height="28"></span>
         </div>
-        <span class="specimen__label">240 × 320 · отступы 24 · blur 15</span>
+        <p class="card__text">Title</p>
       </div>
-
     </div>
-  </section>
 
-  <!-- ============ Апельсин ============ -->
-  <section class="section">
-    <div class="section__head">
-      <h2 class="section__title">Апельсин</h2>
-      <span class="section__note">логотип по центру · подложка apelsin-card-lg / apelsin-card-sm</span>
-    </div>
-    <div class="specimens">
-
-      <div class="specimen">
-        <div class="card card--lg card--apelsin">
-          <div class="card__inner">
-            <div class="card__bg" aria-hidden="true">
-              <div class="card__tint"></div>
-              <img class="card__img" src="img/apelsin-card-lg.png" alt="">
-            </div>
-            <div class="card__logo">
-              <img src="img/apelsin-lg.svg" alt="Апельсин" width="218" height="106">
-            </div>
-            <p class="card__text">Выигрывайте призы с картой Апельсин</p>
-          </div>
+    <!-- Default, размер 6 -->
+    <div class="card card--sm card--default">
+      <div class="card__inner">
+        <div class="card__bg" aria-hidden="true">
+          <div class="card__tint"></div>
+          <img class="card__img" src="img/card-sm.png" alt="">
         </div>
-        <span class="specimen__label">312 × 420 · логотип 218 × 105.7</span>
-      </div>
-
-      <div class="specimen">
-        <div class="card card--sm card--apelsin">
-          <div class="card__inner">
-            <div class="card__bg" aria-hidden="true">
-              <div class="card__tint"></div>
-              <img class="card__img" src="img/apelsin-card-sm.png" alt="">
-            </div>
-            <div class="card__logo">
-              <img src="img/apelsin-sm.svg" alt="Апельсин" width="140" height="68">
-            </div>
-            <p class="card__text">Выигрывайте призы с картой Апельсин</p>
-          </div>
+        <div class="card__top">
+          <span class="card__num">01</span>
+          <span class="card__icon"><img src="img/chevron-24.svg" alt="" width="24" height="24"></span>
         </div>
-        <span class="specimen__label">240 × 320 · логотип 140 × 67.9</span>
+        <p class="card__text">Title</p>
       </div>
-
     </div>
-  </section>
 
-  <!-- ============ Мишка ============ -->
-  <section class="section">
-    <div class="section__head">
-      <h2 class="section__title">Мишка</h2>
-      <span class="section__note">градиентная подложка вместо картинки · высота по контенту</span>
-    </div>
-    <div class="specimens">
-
-      <div class="specimen">
-        <div class="bear bear--lg">
-          <div class="bear__bg" aria-hidden="true"></div>
-          <div class="bear__art"><img src="img/mixy.png" alt="Микси"></div>
-          <p class="bear__name">Микси</p>
-          <div class="bear__glow" aria-hidden="true"></div>
+    <!-- Апельсин, размер 8 -->
+    <div class="card card--lg card--apelsin">
+      <div class="card__inner">
+        <div class="card__bg" aria-hidden="true">
+          <div class="card__tint"></div>
+          <img class="card__img" src="img/apelsin-card-lg.png" alt="">
         </div>
-        <span class="specimen__label">244.8 px · слот арта 212 · арт 291</span>
-      </div>
-
-      <div class="specimen">
-        <div class="bear bear--sm">
-          <div class="bear__bg" aria-hidden="true"></div>
-          <div class="bear__art"><img src="img/mixy.png" alt="Микси"></div>
-          <p class="bear__name">Микси</p>
-          <div class="bear__glow" aria-hidden="true"></div>
+        <div class="card__logo">
+          <img src="img/apelsin-lg.svg" alt="Апельсин" width="218" height="106">
         </div>
-        <span class="specimen__label">180 px · слот арта 156 · арт 214</span>
+        <p class="card__text">Выигрывайте призы с картой Апельсин</p>
       </div>
-
     </div>
-  </section>
+
+    <!-- Апельсин, размер 6 -->
+    <div class="card card--sm card--apelsin">
+      <div class="card__inner">
+        <div class="card__bg" aria-hidden="true">
+          <div class="card__tint"></div>
+          <img class="card__img" src="img/apelsin-card-sm.png" alt="">
+        </div>
+        <div class="card__logo">
+          <img src="img/apelsin-sm.svg" alt="Апельсин" width="140" height="68">
+        </div>
+        <p class="card__text">Выигрывайте призы с картой Апельсин</p>
+      </div>
+    </div>
+
+    <!-- Мишка, размер 8 -->
+    <div class="bear bear--lg">
+      <div class="bear__bg" aria-hidden="true"></div>
+      <div class="bear__art"><img src="img/mixy.png" alt="Микси"></div>
+      <p class="bear__name">Микси</p>
+      <div class="bear__glow" aria-hidden="true"></div>
+    </div>
+
+    <!-- Мишка, размер 6 -->
+    <div class="bear bear--sm">
+      <div class="bear__bg" aria-hidden="true"></div>
+      <div class="bear__art"><img src="img/mixy.png" alt="Микси"></div>
+      <p class="bear__name">Микси</p>
+      <div class="bear__glow" aria-hidden="true"></div>
+    </div>
+
+  </div>
 
 <script>window.__done = true;</script>
 </body>
