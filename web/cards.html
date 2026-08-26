@@ -22,6 +22,11 @@
 
     --card-tint: rgba(138, 157, 214, 0.10);
     --sky: #1B2E7A;
+
+    /* Размер фона по макету: 1920px на desktop и tablet, 960px на mobile.
+       Переопределяется в media-query ниже. Используется и body, и .card__blur
+       (размытая копия фона обязана совпадать с фоном страницы). */
+    --bg-size: 1920px;
   }
 
   *{ margin:0; box-sizing:border-box }
@@ -30,12 +35,18 @@
 
   body{
     min-height:100vh;
-    /* размер и привязка как в макете: 1920 × 1920 от левого верхнего угла.
-       repeat — на случай экрана шире 1920 (подложка бесшовная, проверено). */
-    background: var(--sky) url("img/mishki-bg.png") top left / 1920px 1920px repeat fixed;
+    /* привязка как в макете: от левого верхнего угла. repeat — на случай
+       экрана шире тайла (подложка бесшовная, проверено). */
+    background: var(--sky) url("img/mishki-bg.png") top left / var(--bg-size) var(--bg-size) repeat fixed;
     font-family: "X5 Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
     color: var(--neutral-white-100);
     padding: 52px 24px;
+  }
+
+  /* mobile-фрейм макета (360–767): фон вдвое мельче — звёзды крупнее не
+     становятся на узком экране, как в desktop/tablet. */
+  @media (max-width: 767px){
+    :root{ --bg-size: 960px; }
   }
 
   /* ряд карточек: зазор 24 везде, ряд 1176 по центру — как во фреймах.
@@ -104,7 +115,7 @@
   .card__blur{
     position:absolute;
     inset: calc(-3 * var(--blur));
-    background: url("img/mishki-bg.png") top left / 1920px 1920px repeat fixed;
+    background: url("img/mishki-bg.png") top left / var(--bg-size) var(--bg-size) repeat fixed;
     filter: blur(var(--blur));
   }
   .card__tint{ position:absolute; inset:0; border-radius: var(--radius); background: var(--card-tint) }
