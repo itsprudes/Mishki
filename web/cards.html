@@ -79,8 +79,34 @@
   .card--default .card__inner{ justify-content:space-between }
   .card--apelsin .card__inner{ gap: var(--gap) }
 
-  /* подложка: тонирующий слой + картинка со смешением по фону страницы */
-  .card__bg{ position:absolute; inset:0; pointer-events:none; border-radius: var(--radius) }
+  /* Подложка карточки — три слоя снизу вверх:
+       .card__blur — размытая копия фона страницы,
+       .card__tint — тонирующая заливка,
+       .card__img  — картинка, смешанная по lighten.
+
+     Размытие сделано копией фона, а не backdrop-filter, намеренно.
+     backdrop-filter пришлось бы вешать на тот же элемент, где стоит
+     mix-blend-mode: если перенести его на родителя, тот изолирует
+     наложение и карточка становится глухой. А связку
+     mix-blend-mode + backdrop-filter на одном элементе тянет только
+     Chromium — Safari и Firefox молча выбрасывают размытие.
+
+     Копия работает везде: слой повторяет background страницы один в один,
+     включая attachment, поэтому совмещается с ним при любом поведении
+     браузера. filter размывает и края слоя, поэтому он больше карточки,
+     а лишнее срезает overflow родителя. */
+  .card__bg{
+    position:absolute; inset:0;
+    pointer-events:none;
+    border-radius: var(--radius);
+    overflow:hidden;
+  }
+  .card__blur{
+    position:absolute;
+    inset: calc(-3 * var(--blur));
+    background: url("img/mishki-bg.png") top left / 1920px 1920px repeat fixed;
+    filter: blur(var(--blur));
+  }
   .card__tint{ position:absolute; inset:0; border-radius: var(--radius); background: var(--card-tint) }
   .card__img{
     position:absolute; inset:0;
@@ -89,8 +115,6 @@
     object-fit:cover;
     border-radius: var(--radius);
     mix-blend-mode: lighten;
-    -webkit-backdrop-filter: blur(var(--blur));
-    backdrop-filter: blur(var(--blur));
   }
 
   /* контент обязан быть позиционированным — иначе .card__bg перекроет его */
@@ -200,6 +224,7 @@
     <div class="card card--lg card--default">
       <div class="card__inner">
         <div class="card__bg" aria-hidden="true">
+          <div class="card__blur"></div>
           <div class="card__tint"></div>
           <img class="card__img" src="img/card-lg.png" alt="">
         </div>
@@ -215,6 +240,7 @@
     <div class="card card--sm card--default">
       <div class="card__inner">
         <div class="card__bg" aria-hidden="true">
+          <div class="card__blur"></div>
           <div class="card__tint"></div>
           <img class="card__img" src="img/card-sm.png" alt="">
         </div>
@@ -230,6 +256,7 @@
     <div class="card card--lg card--apelsin">
       <div class="card__inner">
         <div class="card__bg" aria-hidden="true">
+          <div class="card__blur"></div>
           <div class="card__tint"></div>
           <img class="card__img" src="img/apelsin-card-lg.png" alt="">
         </div>
@@ -244,6 +271,7 @@
     <div class="card card--sm card--apelsin">
       <div class="card__inner">
         <div class="card__bg" aria-hidden="true">
+          <div class="card__blur"></div>
           <div class="card__tint"></div>
           <img class="card__img" src="img/apelsin-card-sm.png" alt="">
         </div>
