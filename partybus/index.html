@@ -119,31 +119,45 @@
     max-width:none;
   }
 
-  /* окно: прямоугольный проём, обрезающий мишку (маска в макете — прямоугольник) */
-  .win{ position:absolute; overflow:hidden; }
+  /* окно: не обрезает мишку жёстко. Видимую область задаёт маска-прямоугольник
+     180×153 @ (29,19) на самом мишке (mask-no-clip в макете), поэтому макушка
+     выступает над верхним краем окна и не срезается. */
+  .win{ position:absolute; cursor:pointer; }
   .win__bear{
-    position:absolute; left:50%; bottom:-68px;
+    position:absolute; left:calc(50% + 1px); bottom:-68px;
     width:240px; height:240px;
     transform: translateX(-50%);
+    -webkit-mask-image: linear-gradient(#000,#000);
+            mask-image: linear-gradient(#000,#000);
+    -webkit-mask-repeat: no-repeat;   mask-repeat: no-repeat;
+    -webkit-mask-size: 180px 153px;   mask-size: 180px 153px;
+    -webkit-mask-position: 29px 19px; mask-position: 29px 19px;
+    transition: bottom .25s ease, -webkit-mask-position .25s ease, mask-position .25s ease;
     pointer-events:none;
   }
   .win__bear img{ width:100%; height:100%; object-fit:cover; display:block; }
+  /* hover: мишка приподнимается (bottom −68→−60), маска съезжает вниз (19→27) */
+  .win:hover .win__bear{
+    bottom:-60px;
+    -webkit-mask-position: 29px 27px; mask-position: 29px 27px;
+  }
 
-  /* состояние «найди нового мишку» — как в макете: затемнённое окно,
-     замок в правом верхнем углу, текст по центру */
+  /* состояние «найди нового мишку» — скруглённая плашка со стеклом,
+     замок в правом верхнем углу, текст снизу (узел 4405-1662875) */
   .win__lock{
     position:absolute; inset:0;
-    background: rgba(16, 18, 54, 0.68);
-    display:flex; align-items:center; justify-content:center;
-    padding:10px; text-align:center;
+    border-radius:14px;
+    background: rgba(0,0,0,0.30);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
   }
   .win__lock-icon{
-    position:absolute; top:9px; right:10px;
-    width:20px; height:20px; opacity:.85;
+    position:absolute; top:14px; right:14px;
+    width:32px; height:32px;
   }
   .win__lock-text{
-    font-size:14px; line-height:18px; font-weight:500; color:#fff;
-    letter-spacing:-.32px;
+    position:absolute; left:16px; right:16px; bottom:16px;
+    font-size:18px; line-height:24px; font-weight:500; color:#fff;
+    letter-spacing:-.48px;
   }
 
   /* ---- контролы карусели ---- */
@@ -256,10 +270,7 @@
     if (win.bear === null){
       el.innerHTML =
         '<div class="win__lock">' +
-          '<svg class="win__lock-icon" viewBox="0 0 24 24" fill="none">' +
-            '<rect x="5" y="10.5" width="14" height="9.5" rx="2.5" fill="rgba(255,255,255,.88)"/>' +
-            '<path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="rgba(255,255,255,.88)" stroke-width="2" fill="none"/>' +
-          '</svg>' +
+          '<img class="win__lock-icon" src="img/lock.svg" alt="">' +
           '<span class="win__lock-text">Найди<br>нового Мишку</span>' +
         '</div>';
     } else {
