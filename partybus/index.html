@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мишки крутышки — Патибас</title>
+<style>
+  :root{
+    --numbers-padding-4: 16px;
+    --numbers-padding-10: 40px;
+    --numbers-padding-15: 60px;
+    --numbers-gap-4: 16px;
+    --numbers-gap-6: 24px;
+    --numbers-gap-10: 40px;
+    --white: #fff;
+    --white-20: rgba(255,255,255,0.20);
+    --sky: #1B2E7A;
+    --bg-size: 1920px;
+
+    /* автобус — фиксированный «пиксельный» блок в координатах макета (3374×640).
+       Виден кусок через окно-карусель; масштабируется как единое целое
+       переменной --bus-scale под брейкпоинт. */
+    --bus-w: 3374px;
+    --bus-h: 640px;
+    --bus-scale: 1;
+  }
+
+  *{ margin:0; box-sizing:border-box }
+
+  html{ background: var(--sky) }
+  body{
+    min-height:100vh;
+    background: var(--sky) url("img/space-bg.png") top left / var(--bg-size) var(--bg-size) repeat fixed;
+    font-family: "X5 Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+    color: var(--white);
+    display:flex; align-items:center; justify-content:center;
+    padding: 40px 20px;
+  }
+  @media (max-width: 767px){ :root{ --bg-size: 960px } body{ padding:0 } }
+
+  /* ================= стеклянная плашка ================= */
+  .party{
+    position:relative;
+    width: 1280px;
+    max-width: 100%;
+    display:flex; flex-direction:column;
+    gap: var(--numbers-gap-10);
+    padding: var(--numbers-padding-15) var(--numbers-padding-15) var(--numbers-padding-10);
+    border-radius: 64px;
+    overflow: clip;
+    background: linear-gradient(180deg, rgba(138,157,214,0.10) 0%, #0a064c 70%);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+  }
+
+  /* ---- шапка: логотип + подзаголовок ---- */
+  .party__top{
+    display:flex; flex-direction:column; align-items:center;
+    gap: var(--numbers-gap-6);
+    padding: var(--numbers-padding-4) 0;
+  }
+  /* логотип — квадратный PNG с текстом в центре; контейнер кропает поля */
+  /* контейнер = пропорция текста в PNG (1621×341 = 4.754:1, замерено),
+     img увеличен так, что текст (79.2% ширины файла) заполняет контейнер */
+  /* контейнер = пропорция букв как в макете (620/120); img увеличен так,
+     что текст (79% ширины файла) заполняет ширину — блики сверху/снизу
+     уходят в обрезку, буквы занимают всю высоту. */
+  .logo{
+    width: 620px; max-width: 88%;
+    aspect-ratio: 620 / 120;
+    position:relative; overflow:hidden;
+  }
+  .logo img{
+    position:absolute; top:49.8%; left:49.8%;
+    width:126.3%; transform: translate(-50%,-50%);
+    display:block;
+  }
+  .party__subtitle{
+    font-size:32px; line-height:40px; font-weight:500; letter-spacing:-0.96px;
+    text-align:center;
+  }
+
+  /* ================= автобус ================= */
+  .bus-block{ display:flex; flex-direction:column; align-items:flex-end; }
+
+  .carousel{
+    width:100%;
+    border-radius: 32px;
+    overflow: hidden;
+    margin-bottom:-36px;      /* как в макете: колёса чуть уходят под контролы */
+  }
+  /* дорожка прокрутки — двигается стрелками */
+  .carousel__track{
+    position:relative;
+    height: calc(var(--bus-h) * var(--bus-scale));
+    transition: transform .45s cubic-bezier(.22,.61,.36,1);
+    will-change: transform;
+  }
+
+  .bus{
+    position:absolute; left:0; top:0;
+    width: var(--bus-w); height: var(--bus-h);
+    transform: scale(var(--bus-scale));
+    transform-origin: top left;
+  }
+  /* фон автобуса воспроизводит кроп из макета (Nano: 3335×640 видимая область,
+     картинка масштабирована и смещена), чтобы окна совпали с координатами. */
+  .bus__photo-wrap{
+    position:absolute; left:0; top:50%;
+    width:3335px; height:640px;
+    transform: translateY(-50%);
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .bus__photo{
+    position:absolute;
+    width:110%; height:191.05%;
+    left:-5.86%; top:-45.37%;
+    max-width:none;
+  }
+
+  /* окно: прямоугольный проём, обрезающий мишку (маска в макете — прямоугольник) */
+  .win{ position:absolute; overflow:hidden; }
+  .win__bear{
+    position:absolute; left:50%; bottom:-68px;
+    width:240px; height:240px;
+    transform: translateX(-50%);
+    pointer-events:none;
+  }
+  .win__bear img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+  /* состояние «найди нового мишку» — как в макете: затемнённое окно,
+     замок в правом верхнем углу, текст по центру */
+  .win__lock{
+    position:absolute; inset:0;
+    background: rgba(16, 18, 54, 0.68);
+    display:flex; align-items:center; justify-content:center;
+    padding:10px; text-align:center;
+  }
+  .win__lock-icon{
+    position:absolute; top:9px; right:10px;
+    width:20px; height:20px; opacity:.85;
+  }
+  .win__lock-text{
+    font-size:14px; line-height:18px; font-weight:500; color:#fff;
+    letter-spacing:-.32px;
+  }
+
+  /* ---- контролы карусели ---- */
+  .controls{
+    display:flex; gap: var(--numbers-gap-6); justify-content:flex-end;
+    padding: var(--numbers-gap-4) var(--numbers-padding-4) 0;
+  }
+  .ctrl{
+    position:relative;
+    width:56px; height:56px; flex:none;
+    border:0; cursor:pointer;
+    border-radius:999px;
+    display:flex; align-items:center; justify-content:center;
+    background:transparent;
+  }
+  .ctrl--metal{ background: var(--white-20); }
+  .ctrl--active{ overflow:hidden; }
+  .ctrl--active .ctrl__bg{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; object-position:bottom; border-radius:999px; pointer-events:none;
+  }
+  .ctrl img.ctrl__icon{ position:relative; width:24px; height:24px; }
+  .ctrl:disabled{ opacity:.4; cursor:default; }
+
+  /* ================= адаптив ================= */
+  /* автобус масштабируется под ширину так, чтобы окна были крупнее на узких
+     экранах — как в макете (desktop мельче, mobile крупнее). */
+  @media (max-width: 1279px){
+    :root{ --bus-scale: 1.25; }
+    .party{ padding: 48px 40px 32px; border-radius: 48px; }
+    .party__subtitle{ font-size:26px; line-height:32px; }
+  }
+  @media (max-width: 767px){
+    :root{ --bus-scale: 1.7; }
+    .party{
+      width:100%; min-height:100vh;
+      padding: 40px 16px 24px; border-radius:0;
+      justify-content:flex-start;
+    }
+    .party__subtitle{ font-size:20px; line-height:26px; }
+    .logo{ max-width: 92%; }
+    .controls{ justify-content:center; }
+  }
+</style>
+</head>
+<body>
+  <main class="party">
+    <div class="party__top">
+      <img class="logo" src="img/logo.png" alt="Патибас">
+      <p class="party__subtitle">Собери все 17 Мишек-крутышек<br>и участвуй в главном розыгрыше</p>
+    </div>
+
+    <div class="bus-block">
+      <div class="carousel">
+        <div class="carousel__track" id="track">
+          <div class="bus" id="bus">
+            <div class="bus__photo-wrap">
+              <img class="bus__photo" src="img/bus.png" alt="Патибас — автобус">
+            </div>
+            <!-- окна генерируются скриптом -->
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl ctrl--metal" id="prev" aria-label="Назад">
+          <img class="ctrl__icon" src="img/chevron-l.svg" alt="">
+        </button>
+        <button class="ctrl ctrl--active" id="next" aria-label="Вперёд">
+          <img class="ctrl__bg" src="img/btn-bg.png" alt="">
+          <img class="ctrl__icon" src="img/chevron-r.svg" alt="">
+        </button>
+      </div>
+    </div>
+  </main>
+
+<script>
+  // Позиции окон в координатах макета (система автобуса 3374×640), из Figma codegen.
+  // bear: номер png (00 — золотой Boss), либо null — окно в состоянии «найди нового мишку».
+  const WINDOWS = [
+    // верхний ряд
+    { l:447,  t:80, w:199, h:128, bear:'01' },
+    { l:716,  t:85, w:192, h:123, bear:'09' },
+    { l:978,  t:83, w:197, h:125, bear:null },
+    { l:1239, t:83, w:195, h:126, bear:'11' },
+    { l:1667, t:84, w:195, h:125, bear:'12' },
+    { l:1904, t:82, w:194, h:127, bear:null },
+    { l:2138, t:84, w:160, h:124, bear:'14' },
+    { l:2337, t:84, w:194, h:126, bear:'15' },
+    { l:2571, t:84, w:195, h:127, bear:null },
+    // нижний ряд
+    { l:84,   t:325, w:126, h:126, bear:'00' },
+    { l:449,  t:328, w:157, h:119, bear:'02' },
+    { l:977,  t:327, w:196, h:120, bear:null },
+    { l:1238, t:328, w:194, h:118, bear:'04' },
+    { l:1670, t:329, w:190, h:116, bear:'05' },
+    { l:1900, t:327, w:192, h:119, bear:null },
+    { l:2137, t:329, w:160, h:119, bear:'07' },
+    { l:2337, t:327, w:194, h:120, bear:'08' },
+  ];
+
+  const bus = document.getElementById('bus');
+  for (const win of WINDOWS){
+    const el = document.createElement('div');
+    el.className = 'win' + (win.bear === null ? ' win--locked' : '');
+    el.style.left   = win.l + 'px';
+    el.style.top    = win.t + 'px';
+    el.style.width  = win.w + 'px';
+    el.style.height = win.h + 'px';
+    if (win.bear === null){
+      el.innerHTML =
+        '<div class="win__lock">' +
+          '<svg class="win__lock-icon" viewBox="0 0 24 24" fill="none">' +
+            '<rect x="5" y="10.5" width="14" height="9.5" rx="2.5" fill="rgba(255,255,255,.88)"/>' +
+            '<path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" stroke="rgba(255,255,255,.88)" stroke-width="2" fill="none"/>' +
+          '</svg>' +
+          '<span class="win__lock-text">Найди<br>нового Мишку</span>' +
+        '</div>';
+    } else {
+      el.innerHTML =
+        '<div class="win__bear"><img src="img/bears/bear-' + win.bear + '.png" alt=""></div>';
+    }
+    bus.appendChild(el);
+  }
+
+  // ---- карусель: листаем автобус стрелками ----
+  const track = document.getElementById('track');
+  const prev = document.getElementById('prev');
+  const next = document.getElementById('next');
+
+  let offset = 0;
+  function metrics(){
+    const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bus-scale')) || 1;
+    const busW = 3374 * scale;
+    const viewW = track.parentElement.clientWidth;
+    const maxOffset = Math.max(0, busW - viewW);
+    const step = viewW * 0.8;
+    return { busW, viewW, maxOffset, step };
+  }
+  function apply(){
+    const { maxOffset } = metrics();
+    offset = Math.max(0, Math.min(offset, maxOffset));
+    track.style.transform = 'translateX(' + (-offset) + 'px)';
+    prev.disabled = offset <= 1;
+    next.disabled = offset >= maxOffset - 1;
+  }
+  prev.addEventListener('click', () => { offset -= metrics().step; apply(); });
+  next.addEventListener('click', () => { offset += metrics().step; apply(); });
+  window.addEventListener('resize', apply);
+  apply();
+
+  window.__done = true;
+</script>
+</body>
+</html>
