@@ -165,22 +165,39 @@
     display:flex; gap: var(--numbers-gap-6); justify-content:flex-end;
     padding: var(--numbers-gap-4) var(--numbers-padding-4) 0;
   }
+  /* металлическая кнопка ButtonMetal (L 56), состояния из компонента 4186-136067 */
   .ctrl{
     position:relative;
     width:56px; height:56px; flex:none;
-    border:0; cursor:pointer;
+    border:0; padding:0; cursor:pointer;
     border-radius:999px;
     display:flex; align-items:center; justify-content:center;
-    background:transparent;
+    background: var(--white-20);        /* виден в состоянии Disabled */
   }
-  .ctrl--metal{ background: var(--white-20); }
-  .ctrl--active{ overflow:hidden; }
-  .ctrl--active .ctrl__bg{
+  .ctrl__bg{
     position:absolute; inset:0; width:100%; height:100%;
-    object-fit:cover; object-position:bottom; border-radius:999px; pointer-events:none;
+    object-fit:cover; object-position:bottom;
+    border-radius:999px; pointer-events:none;
   }
-  .ctrl img.ctrl__icon{ position:relative; width:24px; height:24px; }
-  .ctrl:disabled{ opacity:.4; cursor:default; }
+  .ctrl__overlay{
+    position:absolute; inset:0; border-radius:999px;
+    background:transparent; pointer-events:none;
+    transition: background .12s ease;
+  }
+  .ctrl:hover .ctrl__overlay{ background: rgba(0,0,0,0.16); }   /* Hover */
+  .ctrl:active .ctrl__overlay{ background: rgba(0,0,0,0.24); }  /* Press */
+  .ctrl__icon{ position:relative; width:24px; height:24px; }
+  /* Focus: двойная обводка — внутренняя чёрная 2px, внешняя белая 4px */
+  .ctrl:focus-visible{ outline:none; }
+  .ctrl:focus-visible::after{
+    content:""; position:absolute; inset:0; border-radius:999px;
+    box-shadow: 0 0 0 2px #000, 0 0 0 6px #fff;
+  }
+  /* Disabled: без металла, фон white/20, иконка приглушена */
+  .ctrl:disabled{ cursor:default; }
+  .ctrl:disabled .ctrl__bg,
+  .ctrl:disabled .ctrl__overlay{ display:none; }
+  .ctrl:disabled .ctrl__icon{ opacity:.4; }
 
   /* ================= адаптив ================= */
   /* автобус масштабируется под ширину так, чтобы окна были крупнее на узких
@@ -223,11 +240,14 @@
       </div>
 
       <div class="controls">
-        <button class="ctrl ctrl--metal" id="prev" aria-label="Назад">
+        <button class="ctrl" id="prev" aria-label="Назад">
+          <img class="ctrl__bg" src="img/btn-bg.png" alt="">
+          <span class="ctrl__overlay"></span>
           <img class="ctrl__icon" src="img/chevron-l.svg" alt="">
         </button>
-        <button class="ctrl ctrl--active" id="next" aria-label="Вперёд">
+        <button class="ctrl" id="next" aria-label="Вперёд">
           <img class="ctrl__bg" src="img/btn-bg.png" alt="">
+          <span class="ctrl__overlay"></span>
           <img class="ctrl__icon" src="img/chevron-r.svg" alt="">
         </button>
       </div>
