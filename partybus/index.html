@@ -43,11 +43,12 @@
     position:relative;
     width: 1280px;
     max-width: 100%;
+    --party-px: var(--numbers-padding-15);   /* горизонтальный отступ плашки */
     display:flex; flex-direction:column;
     gap: var(--numbers-gap-10);
-    padding: var(--numbers-padding-15) var(--numbers-padding-15) var(--numbers-padding-10);
+    padding: var(--numbers-padding-15) var(--party-px) var(--numbers-padding-10);
     border-radius: 64px;
-    overflow: clip;
+    overflow: clip;                          /* именно плашка обрезает автобус */
     background: linear-gradient(180deg, rgba(138,157,214,0.10) 0%, #0a064c 70%);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
@@ -59,15 +60,13 @@
     gap: var(--numbers-gap-6);
     padding: var(--numbers-padding-4) 0;
   }
-  /* логотип — квадратный PNG с текстом в центре; контейнер кропает поля */
-  /* контейнер = пропорция текста в PNG (1621×341 = 4.754:1, замерено),
-     img увеличен так, что текст (79.2% ширины файла) заполняет контейнер */
-  /* контейнер = пропорция букв как в макете (620/120); img увеличен так,
-     что текст (79% ширины файла) заполняет ширину — блики сверху/снизу
-     уходят в обрезку, буквы занимают всю высоту. */
+  /* логотип — квадратный PNG с текстом по центру; контейнер кропает поля.
+     Пропорция контейнера = пропорция самого текста (bbox 1621×341 = 4.754:1,
+     замерено по альфе), width подобран так, что текст (79.2% ширины файла)
+     точно вписывается — буквы не срезаются ни по высоте, ни по бокам. */
   .logo{
     width: 620px; max-width: 88%;
-    aspect-ratio: 620 / 120;
+    aspect-ratio: 1621 / 341;
     position:relative; overflow:hidden;
   }
   .logo img{
@@ -83,19 +82,24 @@
   /* ================= автобус ================= */
   .bus-block{ display:flex; flex-direction:column; align-items:flex-end; }
 
+  /* карусель во всю ширину плашки (выходит за её горизонтальный padding);
+     сама НЕ обрезает — обрезает плашка (.party overflow:clip + радиус). */
   .carousel{
-    width:100%;
-    border-radius: 32px;
-    overflow: hidden;
+    width: calc(100% + var(--party-px) * 2);
+    margin-inline: calc(-1 * var(--party-px));
     margin-bottom:-36px;      /* как в макете: колёса чуть уходят под контролы */
+    touch-action: pan-y;      /* по горизонтали тянем сами (drag) */
+    cursor: grab;
   }
-  /* дорожка прокрутки — двигается стрелками */
+  .carousel.is-dragging{ cursor: grabbing; }
+  /* дорожка прокрутки — двигается стрелками и перетаскиванием */
   .carousel__track{
     position:relative;
     height: calc(var(--bus-h) * var(--bus-scale));
     transition: transform .45s cubic-bezier(.22,.61,.36,1);
     will-change: transform;
   }
+  .carousel__track.no-anim{ transition: none; }   /* во время drag без анимации */
 
   .bus{
     position:absolute; left:0; top:0;
@@ -186,32 +190,40 @@
   }
   .ctrl:hover .ctrl__overlay{ background: rgba(0,0,0,0.16); }   /* Hover */
   .ctrl:active .ctrl__overlay{ background: rgba(0,0,0,0.24); }  /* Press */
-  .ctrl__icon{ position:relative; width:24px; height:24px; }
+  /* иконка через маску — цвет задаётся CSS, как в компоненте:
+     тёмная #2C323C на металле, white/50 в Disabled */
+  .ctrl__icon{
+    position:relative; width:24px; height:24px;
+    background: #2C323C;
+    -webkit-mask: var(--icon) center / contain no-repeat;
+            mask: var(--icon) center / contain no-repeat;
+  }
   /* Focus: двойная обводка — внутренняя чёрная 2px, внешняя белая 4px */
   .ctrl:focus-visible{ outline:none; }
   .ctrl:focus-visible::after{
     content:""; position:absolute; inset:0; border-radius:999px;
     box-shadow: 0 0 0 2px #000, 0 0 0 6px #fff;
   }
-  /* Disabled: без металла, фон white/20, иконка приглушена */
+  /* Disabled: без металла, фон white/20, иконка white/50 */
   .ctrl:disabled{ cursor:default; }
   .ctrl:disabled .ctrl__bg,
   .ctrl:disabled .ctrl__overlay{ display:none; }
-  .ctrl:disabled .ctrl__icon{ opacity:.4; }
+  .ctrl:disabled .ctrl__icon{ background: rgba(255,255,255,0.5); }
 
   /* ================= адаптив ================= */
   /* автобус масштабируется под ширину так, чтобы окна были крупнее на узких
      экранах — как в макете (desktop мельче, mobile крупнее). */
   @media (max-width: 1279px){
     :root{ --bus-scale: 1.25; }
-    .party{ padding: 48px 40px 32px; border-radius: 48px; }
+    .party{ --party-px: 40px; padding: 48px var(--party-px) 32px; border-radius: 48px; }
     .party__subtitle{ font-size:26px; line-height:32px; }
   }
   @media (max-width: 767px){
     :root{ --bus-scale: 1.7; }
     .party{
+      --party-px: 16px;
       width:100%; min-height:100vh;
-      padding: 40px 16px 24px; border-radius:0;
+      padding: 40px var(--party-px) 24px; border-radius:0;
       justify-content:flex-start;
     }
     .party__subtitle{ font-size:20px; line-height:26px; }
@@ -243,12 +255,12 @@
         <button class="ctrl" id="prev" aria-label="Назад">
           <img class="ctrl__bg" src="img/btn-bg.png" alt="">
           <span class="ctrl__overlay"></span>
-          <img class="ctrl__icon" src="img/chevron-l.svg" alt="">
+          <span class="ctrl__icon" style="--icon:url('img/chevron-l.svg')"></span>
         </button>
         <button class="ctrl" id="next" aria-label="Вперёд">
           <img class="ctrl__bg" src="img/btn-bg.png" alt="">
           <span class="ctrl__overlay"></span>
-          <img class="ctrl__icon" src="img/chevron-r.svg" alt="">
+          <span class="ctrl__icon" style="--icon:url('img/chevron-r.svg')"></span>
         </button>
       </div>
     </div>
@@ -300,7 +312,8 @@
     bus.appendChild(el);
   }
 
-  // ---- карусель: листаем автобус стрелками ----
+  // ---- карусель: стрелки, перетаскивание мышью/тачем, колесо ----
+  const carousel = document.querySelector('.carousel');
   const track = document.getElementById('track');
   const prev = document.getElementById('prev');
   const next = document.getElementById('next');
@@ -309,23 +322,78 @@
   function metrics(){
     const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bus-scale')) || 1;
     const busW = 3374 * scale;
-    const viewW = track.parentElement.clientWidth;
+    const viewW = carousel.clientWidth;
     const maxOffset = Math.max(0, busW - viewW);
     const step = viewW * 0.8;
     return { busW, viewW, maxOffset, step };
   }
+  function clamp(v){ return Math.max(0, Math.min(v, metrics().maxOffset)); }
   function apply(){
-    const { maxOffset } = metrics();
-    offset = Math.max(0, Math.min(offset, maxOffset));
+    offset = clamp(offset);
     track.style.transform = 'translateX(' + (-offset) + 'px)';
+    const { maxOffset } = metrics();
     prev.disabled = offset <= 1;
     next.disabled = offset >= maxOffset - 1;
   }
   prev.addEventListener('click', () => { offset -= metrics().step; apply(); });
   next.addEventListener('click', () => { offset += metrics().step; apply(); });
   window.addEventListener('resize', apply);
-  apply();
 
+  // ---- drag мышью / тачем ----
+  let dragging = false, startX = 0, startOffset = 0, moved = 0;
+  function down(e){
+    dragging = true; moved = 0;
+    startX = (e.touches ? e.touches[0].clientX : e.clientX);
+    startOffset = offset;
+    track.classList.add('no-anim');
+    carousel.classList.add('is-dragging');
+  }
+  function move(e){
+    if (!dragging) return;
+    const x = (e.touches ? e.touches[0].clientX : e.clientX);
+    const dx = x - startX;
+    moved = Math.max(moved, Math.abs(dx));
+    offset = clamp(startOffset - dx);
+    track.style.transform = 'translateX(' + (-offset) + 'px)';
+    if (e.cancelable && e.touches) e.preventDefault();
+  }
+  function up(){
+    if (!dragging) return;
+    dragging = false;
+    track.classList.remove('no-anim');
+    carousel.classList.remove('is-dragging');
+    apply();
+  }
+  carousel.addEventListener('mousedown', down);
+  window.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', up);
+  carousel.addEventListener('touchstart', down, { passive:true });
+  carousel.addEventListener('touchmove', move, { passive:false });
+  window.addEventListener('touchend', up);
+  // клик по мишке не должен срабатывать после перетаскивания
+  carousel.addEventListener('click', (e) => { if (moved > 6){ e.stopPropagation(); e.preventDefault(); } }, true);
+  // предотвратить «призрачный» drag картинок
+  carousel.querySelectorAll('img').forEach(i => i.draggable = false);
+  track.addEventListener('dragstart', e => e.preventDefault());
+
+  // ---- колесо: горизонтальная прокрутка ----
+  let wheelTimer = null;
+  carousel.addEventListener('wheel', (e) => {
+    const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (d === 0) return;
+    const before = offset;
+    offset = clamp(offset + d);
+    if (offset === before) return;   // на краю — не перехватываем страницу
+    e.preventDefault();
+    track.classList.add('no-anim');
+    track.style.transform = 'translateX(' + (-offset) + 'px)';
+    prev.disabled = offset <= 1;
+    next.disabled = offset >= metrics().maxOffset - 1;
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(() => track.classList.remove('no-anim'), 120);
+  }, { passive:false });
+
+  apply();
   window.__done = true;
 </script>
 </body>
